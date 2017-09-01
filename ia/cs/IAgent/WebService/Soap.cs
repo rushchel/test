@@ -4,11 +4,9 @@ using System.Web;
 using System.Web.Services;
 using System.Web.Services.Protocols;
 using WS.Ekassir;
-//using System.Data.OracleClient;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
 using AutoMapper;
-using AutoMapper.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,7 +27,7 @@ namespace WS
 
         public sealed class SimplePersonProfile : Profile
         {
-            protected /*override*/ void Configure()
+            private void Configure()
             {
                 IMappingExpression<DataRow, Person> mappingExpression;
 
@@ -48,7 +46,7 @@ namespace WS
         }
 
         [WebMethod(Description = "Person")]
-        public int GetPerson()
+        public List<Person> GetPerson()
         {
             var dt = new DataTable();
             dt.Columns.Add("FirstName", typeof(string));
@@ -82,7 +80,7 @@ namespace WS
             IMapper mapper = configuration.CreateMapper();
             List<DataRow> list = dt.AsEnumerable().ToList();
             List<Person> people = mapper.Map<List<DataRow>, List<Person>>(list);
-            return people.Count;
+            return people;
         }
 
         [WebMethod(Description = "Plus")]
