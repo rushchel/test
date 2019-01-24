@@ -23,7 +23,18 @@ SELECT TO_CHAR(SYSDATE, 'DD.MM.YYYY') CUR_DATE,
       T.SIGNER_JOB,
       --T.SIGNER_NAME,								
       CM_DZ_REP_UN_BILLING.GET_PERSON_OMSK(T.WF_PROC_ID,'NOTIF') SIGNER_NAME,								
-      T.SIGNER_DOVER,
+      nvl((with signer as (select cm_dz_chty.get_case_chty(doc_claim.char_val_fk1,'SIGNERID') per_id
+                             from ci_case_char doc_claim
+                            where doc_claim.case_id = :CASE_ID 
+							  and doc_claim.char_type_cd = 'REESTR')
+           select trim(replace(dover_sg.adhoc_char_val,'доверенности',''))
+             from signer t left join ci_per_char dover_sg on dover_sg.per_id = t.per_id 
+			                                             and dover_sg.char_type_cd = 'DOVER-SG'
+            where (dover_sg.effdt is null or dover_sg.effdt = (select max(dlz2.effdt) 
+                                                                 from ci_per_char dlz2 
+                                                                where dlz2.per_id = dover_sg.per_id 
+                                                                  and dlz2.char_type_cd = dover_sg.char_type_cd)))
+         ,T.SIGNER_DOVER) SIGNER_DOVER,
       T.RECEIVER_JOB,
       T.RECEIVER_NAME,
       TO_CHAR(TO_DATE(T.DOC_DAT, 'DD.MM.YYYY')+10, 'DD.MM.YYYY') PAY_TO_DATE,
