@@ -2569,8 +2569,16 @@ function get_tfg_select_nopeni(i_case_id in char) return T_TFG_NEW_SET pipelined
         v_doc_head_rec.eo_conn_name:=r.eo_conn_name;
     end loop;*/
   --
-     if trim(v_cis_division) = 'OMS2'
-        then v_signer_default := 6398780652;
+     if trim(v_cis_division) = 'OMS2' then
+        begin
+		  select cm_dz_chty.get_case_chty(doc_claim.char_val_fk1,'SIGNERID') per_id
+		    into v_signer_default
+		    from ci_case_char doc_claim
+		   where doc_claim.case_id = i_case_id 
+		     and doc_claim.char_type_cd = 'REESTR';
+        exception when others then
+          v_signer_default := 6398780652;
+        end;
      elsif trim(v_cis_division) = 'ORL1'
         then v_signer_default := 1243232308;
      else v_signer_default := null;
